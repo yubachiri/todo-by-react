@@ -1,32 +1,37 @@
 import React from 'react';
 import './App.css';
 import firebase, { db } from './firebaseInitializer';
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 function App() {
   const [todo, setTodo] = useState('')
   const [todos, setTodos] = useState([])
-  const [uid, setUid] = useState('')
 
-  useEffect(() => {
-    firebase.auth().signInAnonymously()
+  const [user, loading, error] = useAuthState(firebase.auth())
 
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        // ログイン中
-        console.log('そっち')
-        setUid(user.uid)
-      } else {
-        // ログアウト中
-        console.log('こっち')
-        return <p>ログイン中...</p>
-      }
-    })
-  }, [])
+  firebase.auth().signInAnonymously()
+
+  const loadingScreen = (
+    <div>
+      <p>Loading...</p>
+    </div>
+  )
+
+  if (loading) {
+    return loadingScreen;
+  }
+  if (error) {
+    return (
+      <div>
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
 
   const addTodo = async () => {
     const text = todo
-    const uid = await firebase.auth().currentUser.uid
+    const uid = user.uid
     db
       .collection('todos')
       .doc(uid)
@@ -40,14 +45,14 @@ function App() {
   }
 
   const fetchTodo = async () => {
-    const uid = await firebase.auth().currentUser.uid
+    const uid = user.uid
     db
       .collection('todos')
       .doc(uid)
       .collection('todos')
       .get()
       .then(querySnapshot => {
-        querySnapshot.forEach(function(doc) {
+        querySnapshot.forEach(function (doc) {
           console.log(doc.id, " => ", doc.data());
           setTodos([...todos, doc.data()])
         });
@@ -66,31 +71,29 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h2>TODO</h2>
-        {todo}
-        <input
-          onChange={event => {
-            const text = event.target.value
-            setTodo(text)
-          }}
-        />
+      <h2>TODO</h2>
+      {todo}
+      <input
+        onChange={event => {
+          const text = event.target.value
+          setTodo(text)
+        }}
+      />
 
-        <button
-          onClick={() => addTodo()}
-        >
-          追加する
-        </button>
+      <button
+        onClick={() => addTodo()}
+      >
+        追加する
+      </button>
 
-        <button
-          onClick={fetchTodo}
-        >取得テスト
-        </button>
+      <button
+        onClick={fetchTodo}
+      >取得テスト
+      </button>
 
-        <ul>
-          {todoList()}
-        </ul>
-      </header>
+      <ul>
+        {todoList()}
+      </ul>
     </div>
   );
 }
