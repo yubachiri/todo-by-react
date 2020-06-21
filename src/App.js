@@ -4,7 +4,7 @@ import firebase, { db } from './firebaseInitializer';
 import { useState, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
-import { Container, Paper } from '@material-ui/core';
+import { Button, Container, Paper, TextField } from '@material-ui/core';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -12,6 +12,9 @@ const useStyles = makeStyles(() =>
       padding: '10px',
       margin: '20px 10px'
     },
+    addButton: {
+      margin: '10px'
+    }
   }),
 );
 
@@ -48,9 +51,9 @@ function App() {
   firebase.auth().signInAnonymously()
 
   const loadingScreen = (
-    <div>
+    <Paper className={classes.paper}>
       <p>Loading...</p>
-    </div>
+    </Paper>
   )
 
   if (loading) {
@@ -93,20 +96,31 @@ function App() {
     <div className="App">
       <Container component={'div'} maxWidth={'xs'}>
         <Paper className={classes.paper}>
-          <h2>TODO</h2>
-          <input
-            value={todo}
-            onChange={event => {
-              const text = event.target.value
-              setTodo(text)
-            }}
-          />
+          <div>
+            <TextField
+              label={'TODO'}
+              value={todo}
+              onChange={event => {
+                const text = event.target.value
+                setTodo(text)
+              }}
+            />
+          </div>
 
-          <button
-            onClick={() => addTodo()}
-          >
-            追加する
-          </button>
+          <div>
+            <Button
+              className={classes.addButton}
+              disabled={!todo}
+              variant={'contained'}
+              color={'primary'}
+              size={'small'}
+              onClick={() => {
+                addTodo()
+              }}
+            >
+              追加する
+            </Button>
+          </div>
 
           <ul>
             {todoList()}
