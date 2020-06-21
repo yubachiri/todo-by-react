@@ -7,9 +7,8 @@ import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Button, Container, Paper, TextField } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableRow from '@material-ui/core/TableRow';
+import TodoRow from './TodoRow'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -32,7 +31,7 @@ const fetchTodo = (uid, setTodos) => {
     .then(querySnapshot => {
       const temp = []
       querySnapshot.forEach(doc => {
-        temp.push(doc.data())
+        temp.push({id: doc.id, ...doc.data()})
       });
 
       setTodos([...temp])
@@ -75,7 +74,7 @@ function App() {
   const addTodo = async () => {
     const text = todo
     const uid = user.uid
-    db
+    await db
       .collection('todos')
       .doc(uid)
       .collection('todos')
@@ -87,15 +86,17 @@ function App() {
     setTodo('')
     fetchTodo(user.uid, setTodos)
   }
-  //
-  // const todoList = () => {
-  //   const list = todos.map(todo => {
-  //     return (
-  //       <li key={todo.content}>{todo.content}: {todo.done + ''}</li>
-  //     )
-  //   })
-  //   return list
-  // }
+
+  const todoRows = () => {
+    return todos.map(todo => {
+      return (
+        <TodoRow
+          todo={todo}
+          uid={user.uid}
+        />
+      )
+    })
+  }
 
   return (
     <div className="App">
@@ -130,16 +131,7 @@ function App() {
           <TableContainer>
             <Table>
               <TableBody>
-                {todos.map(todo => (
-                  <TableRow key={todo.content}>
-                    <TableCell>
-                      {todo.done + ''}
-                    </TableCell>
-                    <TableCell>
-                      {todo.content}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {todoRows()}
               </TableBody>
             </Table>
           </TableContainer>
