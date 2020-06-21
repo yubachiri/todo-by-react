@@ -5,11 +5,16 @@ import { useState, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Button, Container, Paper, TextField } from '@material-ui/core';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableRow from '@material-ui/core/TableRow';
 
 const useStyles = makeStyles(() =>
   createStyles({
     paper: {
-      padding: '10px',
+      padding: '20px',
       margin: '20px 10px'
     },
     addButton: {
@@ -82,19 +87,19 @@ function App() {
     setTodo('')
     fetchTodo(user.uid, setTodos)
   }
-
-  const todoList = () => {
-    const list = todos.map(todo => {
-      return (
-        <li key={todo.content}>{todo.content}: {todo.done + ''}</li>
-      )
-    })
-    return list
-  }
+  //
+  // const todoList = () => {
+  //   const list = todos.map(todo => {
+  //     return (
+  //       <li key={todo.content}>{todo.content}: {todo.done + ''}</li>
+  //     )
+  //   })
+  //   return list
+  // }
 
   return (
     <div className="App">
-      <Container component={'div'} maxWidth={'xs'}>
+      <Container maxWidth={'xs'}>
         <Paper className={classes.paper}>
           <div>
             <TextField
@@ -122,9 +127,22 @@ function App() {
             </Button>
           </div>
 
-          <ul>
-            {todoList()}
-          </ul>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                {todos.map(todo => (
+                  <TableRow key={todo.content}>
+                    <TableCell>
+                      {todo.done + ''}
+                    </TableCell>
+                    <TableCell>
+                      {todo.content}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </Container>
     </div>
