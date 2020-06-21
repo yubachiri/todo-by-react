@@ -1,14 +1,36 @@
 import React from 'react';
 import './App.css';
 import firebase, { db } from './firebaseInitializer';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
+
+const fetchTodo = (uid, setTodos) => {
+  db
+    .collection('todos')
+    .doc(uid)
+    .collection('todos')
+    .get()
+    .then(querySnapshot => {
+      const temp = []
+      querySnapshot.forEach(doc => {
+        temp.push(doc.data()['content'])
+      });
+
+      setTodos([...temp])
+    })
+}
 
 function App() {
   const [todo, setTodo] = useState('')
   const [todos, setTodos] = useState([])
 
   const [user, loading, error] = useAuthState(firebase.auth())
+
+  useEffect(() => {
+    if(user?.uid) {
+      fetchTodo(user.uid, setTodos)
+    }
+  }, [user])
 
   firebase.auth().signInAnonymously()
 
@@ -42,38 +64,40 @@ function App() {
       })
 
     setTodo('')
+    fetchTodo(user.uid, setTodos)
   }
 
-  const fetchTodo = async () => {
-    const uid = user.uid
-    db
-      .collection('todos')
-      .doc(uid)
-      .collection('todos')
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(function (doc) {
-          console.log(doc.id, " => ", doc.data());
-          setTodos([...todos, doc.data()])
-        });
-      })
-  }
+  // const fetchTodo = async () => {
+  //   const uid = user.uid
+  //   db
+  //     .collection('todos')
+  //     .doc(uid)
+  //     .collection('todos')
+  //     .get()
+  //     .then(querySnapshot => {
+  //       const temp = []
+  //       querySnapshot.forEach(doc => {
+  //         temp.push(doc.data()['content'])
+  //       });
+  //
+  //       setTodos([...temp])
+  //     })
+  // }
 
   const todoList = () => {
-    fetchTodo()
-    return todos.map(todo => {
-      console.log(todo.content)
+    const list = todos.map(todo => {
       return (
-        <li>{todo.content}</li>
+        <li key={todo}>{todo}</li>
       )
     })
+    return list
   }
 
   return (
     <div className="App">
       <h2>TODO</h2>
-      {todo}
       <input
+        value={todo}
         onChange={event => {
           const text = event.target.value
           setTodo(text)
@@ -86,10 +110,10 @@ function App() {
         追加する
       </button>
 
-      <button
-        onClick={fetchTodo}
-      >取得テスト
-      </button>
+      {/*<button*/}
+      {/*  onClick={fetchTodo}*/}
+      {/*>取得テスト*/}
+      {/*</button>*/}
 
       <ul>
         {todoList()}
